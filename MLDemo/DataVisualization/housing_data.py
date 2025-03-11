@@ -1,7 +1,10 @@
+from asyncio.futures import STACK_DEBUG
+
 from matplotlib.pyplot import figure
 from scipy.stats import alpha
+from sklearn.linear_model import LinearRegression
 
-import DataPulling
+import MLDemo.DataPulling as DataPulling
 import pandas as pd
 from pandas.plotting import scatter_matrix
 import matplotlib.pyplot as plt
@@ -9,6 +12,13 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import OrdinalEncoder
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import FunctionTransformer
+from sklearn.metrics.pairwise import rbf_kernel
+from sklearn.compose import TransformedTargetRegressor
 
 OCEAN_PROXIMITY: str = "ocean_proximity"
 MEDIAN_INCOME: str = "median_income"
@@ -61,6 +71,7 @@ def process_housing_data(housing: pd.DataFrame):
 
     # visualization(strat_train_set.copy().drop(INCOME_CAT, axis=1))
     data_cleaning(strat_train_set.copy().drop(INCOME_CAT, axis=1))
+    # label_scaling(strat_train_set.copy().drop(INCOME_CAT, axis=1))
 
 
 def visualization(housing: pd.DataFrame):
@@ -96,10 +107,65 @@ def data_cleaning(housing: pd.DataFrame, imputer: SimpleImputer | None = None):
     if imputer is None:
         imputer = SimpleImputer(strategy="median")
 
-    housing_num = housing.select_dtypes(include=[np.number])
+    ## select only numeric columns of the table
+    housing_num: pd.DataFrame = housing.select_dtypes(include=[np.number])
     imputer.fit(housing_num)
     imputer.transform(housing_num)
 
+    ordinal_encoder: OrdinalEncoder = OrdinalEncoder()
+    housing_cat = housing[[OCEAN_PROXIMITY]]
+    housing_cat_encoded = ordinal_encoder.fit_transform(housing_cat)
+
+    ## One hot encoder: for each category. Outputs a sparse matrix!
+    cat_encoder: OneHotEncoder = OneHotEncoder()
+    housing_cat_1hot = cat_encoder.fit_transform(housing_cat)
+
+    ## Scaler - this case, [-1, 1].
+    min_max_scaler: MinMaxScaler = MinMaxScaler(feature_range=(-1, 1))
+    housing_num_min_max_scaled: np.ndarray = min_max_scaler.fit_transform(housing_num)
+
+    ## Standardization - mean=0, std=1
+    std_scaler: StandardScaler = StandardScaler()
+    housing_num_std_scaled: np.array = std_scaler.fit_transform(housing_num)
+
+    ## radial basis function as a feature extraction, how far the age distance to 35 years is
+    age_simil_35 = rbf_kernel(housing[[HOUSING_MEDIAN_AGE]], [[35]], gamma=0.1)
+
+    ## custom transformer
+    log_transformer = FunctionTransformer(np.log, inverse_func=np.exp)
+    log_pop = log_transformer.transform(housing[[POPULATION]])
+
+    rbf_transformer = FunctionTransformer(rbf_kernel, kw_args=dict(Y=[[35]], gamma=0.1))
+    age_simil_35 = rbf_transformer.transform(housing[[HOUSING_MEDIAN_AGE]])
+
+    ## 2D transformation
+    sf_coordinates = 37.7749, -122.41
+    sf_transformer = FunctionTransformer(rbf_kernel, kw_args=dict(Y=[sf_coordinates], gamma=0.1))
+    sf_simil = sf_transformer.transform(housing[[LATITUDE, LONGITUDE]])
+    print(sf_simil)
+
+    ## Combination of features
+    ratio_transformer = FunctionTransformer(lambda x: x[:, [0]] / x[:, [1]])
+    print(ratio_transformer.transform(np.array([[1., 2.], [3., 4.]])))
+
+    pass
+
+def label_scaling(housing: pd.DataFrame):
+    target_scaler = StandardScaler()
+    housing_labels =housing[[MEDIAN_HOUSE_VALUE]]
+    scaled_labels = target_scaler.fit_transform(housing_labels)
+    model = LinearRegression()
+    model.fit(housing[[MEDIAN_INCOME]], scaled_labels)
+
+    some_new_data = housing[[MEDIAN_INCOME]].iloc[:5]
+    scaled_predictions = model.predict(some_new_data)
+    predictions = target_scaler.inverse_transform(scaled_predictions)
+    print(predictions)
+    model = TransformedTargetRegressor(LinearRegression(), transformer=StandardScaler())
+
+    model.fit(housing[[MEDIAN_INCOME]], housing_labels)
+    predictions = model.predict(some_new_data)
+    print(predictions)
     pass
 
 def run():

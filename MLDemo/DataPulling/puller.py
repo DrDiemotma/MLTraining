@@ -6,7 +6,7 @@ import tarfile
 import urllib.request
 import queue
 
-from DataPulling import constants
+from MLDemo.DataPulling import constants
 
 
 def pull_text_data(file: str, root: str = constants.DATA_ROOT, target_file: str | None = None) -> str | None:
