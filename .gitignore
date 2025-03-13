@@ -171,4 +171,11 @@ cython_debug/
 .pypirc
 
 .idea/
+Notebooks/bin/
+Notebooks/include/
+Notebooks/lib/
+Notebooks/lib64/
+Notebooks/share/
+Notebooks/etc/
+Notebooks/pyvenv.cfg
 
