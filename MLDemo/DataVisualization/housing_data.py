@@ -1,5 +1,3 @@
-from asyncio.futures import STACK_DEBUG
-
 from matplotlib.pyplot import figure
 from scipy.stats import alpha
 from sklearn.linear_model import LinearRegression
