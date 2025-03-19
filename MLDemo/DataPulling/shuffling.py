@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+from MLDemo.DataPulling import puller
+
 def shuffle_and_split_data(data: pd.DataFrame, test_ratio: float):
     if not 0 < test_ratio < 1:
         raise ValueError("test_ratio must be between 0 and 1 (exclusive)")
@@ -9,3 +11,4 @@ def shuffle_and_split_data(data: pd.DataFrame, test_ratio: float):
     test_indices = shuffled_indices[:test_set_size]
     train_indices = shuffled_indices[test_set_size:]
     return data.iloc[train_indices], data.iloc[test_indices]
+

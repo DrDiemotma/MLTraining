@@ -4,6 +4,8 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline, make_pipeline
 from sklearn.preprocessing import StandardScaler, FunctionTransformer, OneHotEncoder
 
+from MLDemo.CustomRegressor.knn_transformer import KnnTransformer
+
 
 def column_ratio(x: pd.DataFrame, index0: int = 0, index1: int = 1) -> pd.DataFrame:
     """
@@ -46,6 +48,18 @@ def cat_pipeline(imputer_strategy: str = "most_frequent", handle_unknown: str = 
     return make_pipeline(
         SimpleImputer(strategy=imputer_strategy),
         OneHotEncoder(handle_unknown=handle_unknown)
+    )
+
+def knn_pipeline(imputer_strategy: str = "median"):
+    return make_pipeline(
+        SimpleImputer(strategy=imputer_strategy),
+        KnnTransformer()
+    )
+
+def standardize_pipeline(imputer_strategy: str = "median"):
+    return make_pipeline(
+        SimpleImputer(strategy=imputer_strategy),
+        StandardScaler()
     )
 
 

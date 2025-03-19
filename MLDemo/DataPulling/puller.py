@@ -1,12 +1,18 @@
 import os.path
 
+import numpy as np
 import pandas as pd
 import requests
 import tarfile
 import urllib.request
 import queue
+import pickle
+
+from sklearn.datasets import fetch_openml
 
 from MLDemo.DataPulling import constants
+
+from pathlib import Path
 
 
 def pull_text_data(file: str, root: str = constants.DATA_ROOT, target_file: str | None = None) -> str | None:
@@ -131,3 +137,55 @@ def open_tgz(file: str, directory: str | None = None, root: str = constants.DATA
 
     return output_tuples
 
+
+def get_mnist(file: str = "mnist.pkl", overwrite: bool = False) -> tuple[np.array, np.array]:
+    """
+    Get the MNIST data set.
+    :param file: Locally stored file. Used so it doesn't need to be downloaded every time. Is a pickle file.
+    :param overwrite: If the  file needs to be downloaded again even if the local file is present.
+    :return: Tuple of Numpy arrays (data, label)
+    """
+    try:
+        x: np.array = None
+        y: np.array = None
+        if overwrite or not os.path.isfile(file):
+            mnist = fetch_openml('mnist_784', as_frame=False)
+            x, y = mnist.data, mnist.target
+            d = {"x": x, "y": y}
+            with open(file, "wb") as f:
+                pickle.dump(d, f, pickle.HIGHEST_PROTOCOL)
+
+        else:
+            with open(file, "rb") as f:
+                d = pickle.load(f)
+                x, y = d["x"], d["y"]
+    except (FileNotFoundError, OSError) as e:
+        raise e
+    except Exception as e:
+        print(f"Unknown exception: {e}")
+        raise e
+    finally:
+        return x, y
+
+
+def fetch_spam_data():
+    spam_root = "http://spamassassin.apache.org/old/publiccorpus/"
+    ham_url = spam_root + "20030228_easy_ham.tar.bz2"
+    spam_url = spam_root + "20030228_spam.tar.bz2"
+
+    spam_path = Path() / "datasets" / "spam"
+    spam_path.mkdir(parents=True, exist_ok=True)
+    for dir_name, tar_name, url in (("easy_ham", "ham", ham_url),
+                                    ("spam", "spam", spam_url)):
+        if not (spam_path / dir_name).is_dir():
+            path = (spam_path / tar_name).with_suffix(".tar.bz2")
+            print("Downloading", path)
+            urllib.request.urlretrieve(url, path)
+            tar_bz2_file = tarfile.open(path)
+            tar_bz2_file.extractall(path=spam_path)
+            tar_bz2_file.close()
+    return [spam_path / dir_name for dir_name in ("easy_ham", "spam")]
+
+
+if __name__ == "__main__":
+    get_mnist()

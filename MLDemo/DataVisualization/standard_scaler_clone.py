@@ -38,4 +38,4 @@ class StandardScalerClone(BaseEstimator, TransformerMixin):
         if self.with_mean:
             x = x - self.mean_
         return x / self.scale_
-
+    

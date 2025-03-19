@@ -23,6 +23,7 @@ class ClusterSimilarity(BaseEstimator, TransformerMixin):
         x = pd.DataFrame(x)
         return rbf_kernel(x, self.kmeans_.cluster_centers_, gamma=self.gamma)
 
+
     def get_feature_names_out(self, names=None):
         return [f"Cluster {i} similarity" for i in range(self.n_clusters)]
 
