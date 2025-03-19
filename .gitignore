@@ -180,5 +180,5 @@ Notebooks/etc/
 Notebooks/pyvenv.cfg
 
 /Notebooks/Training/housing/housing/housing.csv
-/**/.pkl
-/MLDemo/DataPulling/mnist.pkl
+**/*.pkl
+/**/*.pkl
