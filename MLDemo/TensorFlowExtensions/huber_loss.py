@@ -7,3 +7,7 @@ def huber_fn(y_true: tf.Tensor, y_pred: tf.Tensor):
     linear_loss: tf.Tensor = tf.abs(error) - 0.5
     return tf.where(is_small_error, squared_loss, linear_loss)
 
+
+
+if __name__ == '__main__':
+    pass
