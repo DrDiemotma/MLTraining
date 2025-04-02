@@ -179,6 +179,17 @@ Notebooks/share/
 Notebooks/etc/
 Notebooks/pyvenv.cfg
 
-/Notebooks/Training/housing/housing/housing.csv
+# own documents
+Notebooks/Training/housing/housing/housing.csv
+*.pkl
 **/*.pkl
 /**/*.pkl
+*.keras
+Notebooks/Training/logs/
+Notebooks/.virtual_documents/
+.ipynb_checkpoints/
+*.tfrecords
+
+.temp/
+.tmp/
+MLDemo/DataPulling/housing/housing/housing.csv
