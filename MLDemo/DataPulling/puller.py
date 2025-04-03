@@ -63,7 +63,8 @@ def pull_tgz_data(file: str, root: str = constants.DATA_ROOT, target_directory: 
     return target_directory
 
 
-def open_csv(file: str, stored_file: str | None = None, root: str = constants.DATA_ROOT, overwrite: bool = False) \
+def open_csv(file: str, stored_file: str | None = None, root: str = constants.DATA_ROOT, overwrite: bool = False,
+             **kwargs) \
         -> pd.DataFrame | None:
     if stored_file is None:
         tokens = file.split('/')
@@ -74,7 +75,7 @@ def open_csv(file: str, stored_file: str | None = None, root: str = constants.DA
         if loaded_file is None:
             return None
 
-    data = pd.read_csv(stored_file)
+    data = pd.read_csv(stored_file, **kwargs)
     return data
 
 def open_tgz(file: str, directory: str | None = None, root: str = constants.DATA_ROOT, overwrite: bool = False) \
